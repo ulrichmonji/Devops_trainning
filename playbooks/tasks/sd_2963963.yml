@@ -1,9 +1,0 @@
----
-- name: "Change /usr/lib/servicetools/kong"
-  copy:
-    src: files/usr_lib_servicetools_kong
-    dest: "/usr/lib/servicetools/kong"
-    owner: "root"
-    group: "root"
-    backup: "yes"
-    mode: 0755

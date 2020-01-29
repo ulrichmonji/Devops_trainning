@@ -1,6 +1,0 @@
-#!/bin/bash
-
-echo -e "$HOSTNAME \n$(route -n | grep 0.0.0.0)" > /root/route_$HOSTNAME
-
-echo -e "$HOSTNAME \n$(cat /etc/sysconfig/network | grep GATEWAY=)" > /root/gateway_$HOSTNAME
-

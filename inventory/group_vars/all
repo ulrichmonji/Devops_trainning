@@ -1,5 +1,6 @@
 ansible_user: "admin"
-#api: "ec2-54-172-25-98.compute-1.amazonaws.com"
+frontend_hostname: "ec2-34-239-110-81.compute-1.amazonaws.com"
 api: "127.0.0.1"
+ansible_target_ip: "172.31.91.9"
 api_port: "5000"
 

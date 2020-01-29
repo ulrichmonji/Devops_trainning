@@ -1,0 +1,10 @@
+[Unit]
+Description=manage student_age script.
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python /student_age.py
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,76 @@
+---
+- name: "Create SFTP users"
+  user:
+    name: "{{ item.username }}"
+    password: "{{ item.password }}"
+    update_password: "always"
+    home: "{{ item.home }}"
+    shell: "{{ item.shell }}" # /usr/libexec/openssh/sftp-server
+    group: "{{ item.group }}" # sftp
+    comment: "{{ item.comment }}" # user SFTP Carrefour SDXXXXXXX
+  with_items:
+    - "{{ sftp_users }}"
+
+
+- name: "Edit home  folder right"
+  file:
+    path: "{{ item.home }}"
+    owner: "root"
+    group: "sftp"
+    state: directory
+    mode: 0750
+  with_items:
+    - "{{ sftp_users }}"
+
+- name: "Create .ssh folder"
+  file:
+    path: "{{item.home}}/.ssh"
+    owner: root
+    group: root
+    state: directory
+    mode: 0755
+  tags: sd_2982228
+  with_items:
+    - "{{ sftp_users }}"
+
+
+- name: "Create upload folder"
+  file:
+    path: "{{ item.sub_folder }}"
+    owner: "{{ item.username }}"
+    group: "{{ item.group }}"
+    state: directory
+    mode: 0775
+  with_items:
+    - "{{ sftp_users }}"
+
+- name: "Push SFTP configuration"
+  template:
+    src: "templates/{{conf_sftp_source_file}}"
+    dest: "/etc/ssh/{{conf_sftp_dest_file}}"
+    mode: 0644
+    owner: root
+    group: root
+    backup: yes
+  notify: "Restart SFTP"
+
+
+- name: "Push SFTP users public keyx"
+  lineinfile:
+    path: "{{ item.home }}/.ssh/authorized_keys"
+    line: "{{item.public_key}}"
+    mode: 0644
+    owner: root
+    group: root
+  tags: sd_2982228
+  with_items:
+    - "{{ sftp_users }}"
+
+- name: "Add bind mount on fstab"
+  lineinfile:
+    path: "/etc/fstab"
+    line: "{{ item.export_home }} {{ item.sub_folder }} none bind,defaults,auto 0 0" 
+  with_items:
+    - "{{ sftp_users }}"
+  notify: "Mount NFS partition"
+

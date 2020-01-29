@@ -1,0 +1,180 @@
+---
+- name: "[MIDDLE][tcollector] Install necessary packages for tcollector"
+  yum:
+#     name: java-1.8.0-openjdk-devel.x86_64,awl-tcollector-tomcat.noarch,awl-tcollector-jstat.noarch,servicetools.noarch
+     name: awl-tcollector-tomcat.noarch,awl-tcollector-jstat.noarch,servicetools.noarch
+     enablerepo: awl-main
+     state: latest
+
+- name: "[MIDDLE][tcollector] Install necessary packages for tcollector [Only CentOS 7]"
+  yum:
+     name: servicetools-tcollector.noarch,awl-tcollector-system.noarch,awl-tcollector-network.noarch,awl-tcollector.noarch
+     enablerepo: awl-main
+     state: latest
+  when:
+    - ansible_distribution == "CentOS"
+    - ansible_distribution_major_version == "7"
+
+- name: "Add OC on /usr/lib/servicetools/tcollector "
+  template:
+    src: templates/usr_lib_servicetools_tcollector
+    dest: /usr/lib/servicetools/tcollector
+    mode: 0755
+    owner: root
+    group: root
+    backup: yes
+  when:
+    - ansible_distribution == "CentOS"
+    - ansible_distribution_major_version == "6"
+
+- name: "[MIDDLE][tocllector] Create directory structure Part I"
+  file:
+    path: "{{ tcollector_path }}/{{ item }}"
+    state: directory
+    owner: www
+    group: server
+  with_items:
+    - etc
+    - lib
+    - run
+
+- name: "[MIDDLE][tocllector] Create directory structure Part II"
+  file:
+    path: "{{ tcollector_path }}/etc/plugins"
+    state: directory
+    owner: www
+    group: server
+
+
+
+- name: "Install tcollector servicetools"
+  copy:
+    dest: /etc/servicetools/services/{{ client_name }}/tcollector
+    content: tcollector|20|-B {{ tcollector_path }} -v|tcollector|www
+
+- name: "Create tcollector dispatcher"
+  template:
+    src: templates/dispather_tcollector
+    dest: /etc/servicetools/dispatchers/{{ client_name }}/tcollector
+    mode: 0744
+    owner: root
+    group: root
+  when:
+    - ansible_distribution == "CentOS"
+    - ansible_distribution_major_version == "6"
+
+
+- name: "[MIDDLE][tocllector] Create logs directory"
+  file:
+    path: /usr/MIDDLELOGS/{{ client_folder_name }}/tcollector
+    state: directory
+    owner: www
+    group: server
+
+- name: "[MIDDLE][tocllector] Symlink logs folder"
+  file:
+    src: /usr/MIDDLELOGS/{{ client_folder_name }}/tcollector
+    dest: "{{ tcollector_path }}/logs"
+    state: link
+
+
+- name: "[MIDDLE][tocllector] Create plugins folder"
+  file:
+    dest: "{{ tcollector_path }}/lib/plugins/{{ item }}"
+    state: directory
+    owner: www
+    group: server
+  with_items:
+    - '0'
+    - 'lib'
+
+- name: "[MIDDLE][tcollector] Copy plugins file"
+  template:
+    src: templates/{{ item }}
+    dest: "{{ tcollector_path }}/lib/plugins/0/{{ item }}"
+    mode: 0755
+    owner: www
+    group: server
+    backup: yes
+  with_items:
+    - tomcat.py
+    - jstat.py
+    - system.py
+    - network.py
+    - doCollecTempsMiddle.py
+    - doCollecTempsMiddleV2.py
+    - doCollectMetier.py
+
+
+- name: "[MIDDLE][tcollector] Copy  tcollector library"
+  template:
+    src: templates/{{ item }}
+    dest: "{{ tcollector_path }}/lib/plugins/lib/{{ item }}"
+    mode: 0744
+    backup: yes
+  with_items:
+    - awlutils.py
+    - utils.py
+  notify:
+    - "Restart tcollector servicetools"
+
+
+
+
+- name: "[MIDDLE][tcollector] Copy standard tcollector conf file"
+  template:
+    src: templates/{{ item }}
+    dest: "{{ tcollector_path }}/etc/{{ item }}"
+    mode: 0755
+    owner: www
+    group: server
+    backup: yes
+  with_items:
+    - tcollector.conf
+  notify:
+    - "Restart tcollector servicetools"
+
+- name: "[MIDDLE][tcollector] SD 2805303 add plugin metier"
+  template:
+    src: templates/{{ item }}
+    dest: "{{ tcollector_path }}/etc/plugins/{{ item }}"
+    mode: 0755
+    owner: www
+    group: server
+    backup: yes
+  with_items:
+    - metier_tomcat.conf
+
+- name: "[MIDDLE][tcollector] Copy  tcollector plugins conf file"
+  copy:
+    src: "/etc/tcollector/plugins/{{ item }}"
+    dest: "{{ tcollector_path }}/etc/plugins/"
+    owner: www
+    group: server
+    mode: 0755
+    remote_src: yes
+    backup: yes
+  with_items:
+    - jstat.conf
+    - network.conf
+    - system.conf
+    - tomcat.conf
+    - metier_tomcat.conf
+  ignore_errors: yes
+  notify:
+    - "restart tcollector servicetools CENTOS 6"
+
+- name: "[MIDDLE][tcollector] Disable and stop  native tcollector process"
+  service:
+    name: tcollector
+    enabled: no
+    state: stopped
+
+#- name: "[MIDDLE][tcollector] restart tcollector servicetools"
+#  command: "restart_service tcollector"
+
+
+
+
+
+

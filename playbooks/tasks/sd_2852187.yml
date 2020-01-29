@@ -1,0 +1,13 @@
+---
+- hosts: PROD_MIDDLE:&~^[t]
+  name: "Change network conf files"
+  become: true
+  tags: sd_2852187
+  tasks:
+  - name: "Change /etc/hosts"
+    lineinfile:
+      path: /etc/hosts
+      line: '10.55.51.24 crmlogin.fr.carrefour.com'
+      state: present
+      backup: yes
+

@@ -1,0 +1,17 @@
+---
+- name: "Install activemq servicetools"
+  copy:
+    dest: /etc/servicetools/services/{{ client_name }}/activemq
+    content: activemq570|20|activemq|activemq|root
+
+- name: "Create activemq dispatcher"
+  copy:
+    dest: /etc/servicetools/dispatchers/{{ client_name }}/activemq
+    content: "{{ ansible_hostname }}\n"
+    mode: 0744
+    owner: root
+    group: root
+  when:
+    - ansible_distribution == "CentOS"
+    - ansible_distribution_major_version == "6"
+

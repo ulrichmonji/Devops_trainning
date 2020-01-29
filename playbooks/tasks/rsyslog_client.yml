@@ -1,0 +1,37 @@
+---
+- name: "[RSYSLOG] Create rsyslog work directory"
+  file:
+    path : /var/spool/rsyslog
+    owner : root
+    group : root
+    state : directory
+
+- name: "[RSYSLOG] Push module configuration"
+  copy:
+    src: files/00_modules.conf
+    dest: /etc/rsyslog.d/00_modules.conf
+  notify: "Restart rsyslog"
+
+- name: "[RSYSLOG] Push global configuration"
+  copy:
+    src: files/20_global.conf
+    dest: /etc/rsyslog.d/20_global.conf
+  notify: "Restart rsyslog"
+
+- name: "[RSYSLOG] Push appli configurations"
+  template:
+    src: templates/40_applis.conf.j2
+    dest: /etc/rsyslog.d/40_applis.conf
+  notify: "Restart rsyslog"
+
+- name: "[RSYSLOG] Push remote configuration"
+  template:
+    src: templates/50_remote.conf.j2
+    dest: /etc/rsyslog.d/50_remote.conf
+  notify: "Restart rsyslog"
+
+- name: "[RSYSLOG] Make sure rsyslog is started"
+  service:
+    name: rsyslog
+    state: started
+

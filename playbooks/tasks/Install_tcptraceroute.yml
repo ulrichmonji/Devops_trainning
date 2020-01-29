@@ -1,0 +1,6 @@
+---
+- name: "Install tcptraceroute package"
+  yum:
+    name: tcptraceroute
+    enablerepo: epel
+    state: latest

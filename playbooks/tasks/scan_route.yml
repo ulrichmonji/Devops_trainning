@@ -1,0 +1,16 @@
+- hosts: PROD
+  name: "Scan route prod "
+  become: true
+  tags: scan
+  tasks:
+  - name: "Push scan script"
+    template:
+      src: files/scan_route
+      dest: /root/scan_route.sh
+      mode: 0744
+      owner: root
+      group: root
+
+  - name: "launch script scan on remote server"
+    shell: "/root/scan_route.sh"
+

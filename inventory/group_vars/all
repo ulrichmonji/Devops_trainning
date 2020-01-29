@@ -1,0 +1,5 @@
+ansible_user: "admin"
+#api: "ec2-54-172-25-98.compute-1.amazonaws.com"
+api: "127.0.0.1"
+api_port: "5000"
+

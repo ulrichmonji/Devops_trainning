@@ -1,0 +1,82 @@
+---
+#- hosts: EACC:IACC
+- hosts: wscrfn01s,wscrfn02s,tscrfn01s,tscrfn02s,tscrfn03s,tscrfn04s,tscrfn05s,tscrfn06s,tscrfn07s,tscrfn08s,tscrfn09s,tscrfn20s,tscrfn11s,tscrfn12s,tscrfn13s,tscrfn14s,tscrfn15s,tscrfn16s,tscrfn17s,tscrfn18s,tscrfn19s,tscrfn21s,tscrfn22s,tscrfn23s,tscrfn24s,tscrfn25s,tscrfn26s,tscrfn27s,bscrfn01s,bscrfn02s,bscrfn03s,bscrfn04s,bscrfn05s
+  name: "Change network conf files"
+  become: true
+  tags: vlan_migration
+  tasks:
+  - name: "Change /etc/sysconfig/network-scripts/ifcfg-eth1"
+    lineinfile:
+      path: /etc/sysconfig/network-scripts/ifcfg-eth1
+      regexp: '^IPADDR='
+      line: 'IPADDR={{ ip_eth1 }}'
+#    notify: "Restart eth1 interface"
+    tags: ipaddress
+
+  - name: "Change /etc/sysconfig/network-scripts/ifcfg-eth1 for mask"
+    lineinfile:
+      path: /etc/sysconfig/network-scripts/ifcfg-eth1
+      regexp: '^NETMASK='
+      line: 'NETMASK=255.255.255.0'
+#    notify: "Restart eth1 interface"
+    tags: mask
+
+  - name: "Change /etc/sysconfig/network-scripts/ifcfg-eth1 for broadcast"
+    lineinfile:
+      path: /etc/sysconfig/network-scripts/ifcfg-eth1
+      regexp: '^BROADCAST='
+      line: 'BROADCAST={{ broadcast_data }}'
+#    notify: "Restart eth1 interface"
+    tags: broadcast
+
+  handlers:
+  - name: "Restart eth1 interface"
+    shell: "ifdown eth1 && ifup eth1"
+    ignore_errors: yes
+
+
+
+
+- hosts: wscrfn01s,wscrfn02s
+  name: "Change network conf files"
+  become: true
+  tags: vlan_migration
+  tasks:
+  - name: "Deliver /etc/sysconfig/network-scripts/route-eth1"
+    template:
+      src: templates/route-eth1-iacc-front
+      dest: "/etc/sysconfig/network-scripts/route-eth1"
+      mode: 0644
+      owner: root
+      group: root
+    tags: route_front
+    notify: "Restart eth1 interface FRONT"
+
+
+  handlers:
+  - name: "Restart eth1 interface FRONT"
+    shell: "umount -l /WEBS/carrefour_fr && ifdown eth1 && ifup eth1 && mount -a"
+    ignore_errors: yes
+
+
+- hosts: tscrfn01s,tscrfn02s,tscrfn03s,tscrfn04s,tscrfn05s,tscrfn06s,tscrfn07s,tscrfn08s,tscrfn09s,tscrfn20s,tscrfn11s,tscrfn12s,tscrfn13s,tscrfn14s,tscrfn15s,tscrfn16s,tscrfn17s,tscrfn18s,tscrfn19s,tscrfn21s,tscrfn22s,tscrfn23s,tscrfn24s,tscrfn25s,tscrfn26s,tscrfn27s #bscrfn01s,bscrfn02s,bscrfn03s,bscrfn04s,bscrfn05s
+  name: "Change network conf files"
+  become: true
+  tags: route_middle
+  tasks:
+  - name: "Deliver /etc/sysconfig/network-scripts/route-eth1"
+    template:
+      src: templates/route-eth1-iacc-middle
+      dest: "/etc/sysconfig/network-scripts/route-eth1"
+      mode: 0644
+      owner: root
+      group: root
+    tags: route
+    notify: "Restart eth1 interface MIDDLE"
+
+  handlers:
+  - name: "Restart eth1 interface MIDDLE"
+    shell: "umount -l /WEBS/carrefour_fr && umount -l /MIDDLE/carrefour_fr/batch && umount -l /MIDDLE/carrefour_fr && umount -l /DEPOT/sftp-carrefour_fr-stg  && ifdown eth1 && ifup eth1 && mount -a"
+#    shell: "ifdown eth1 && ifup eth1" # uniquement pour les BDD : #bscrfn01s,bscrfn02s,bscrfn03s,bscrfn04s,bscrfn05s
+    ignore_errors: yes
+

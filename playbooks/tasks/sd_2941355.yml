@@ -1,0 +1,13 @@
+---
+- hosts: EACC_MIDDLE:&~^[t]
+  name: "Change network conf files"
+  become: true
+  tags: sd_2941355
+  tasks:
+  - name: "Change /etc/hosts"
+    lineinfile:
+      path: /etc/hosts
+      line: '100.65.12.129 order-prep.oms.fr.carrefour.com #SD 2941355'
+      state: present
+      backup: yes
+

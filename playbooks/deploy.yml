@@ -1,0 +1,87 @@
+---
+- hosts: ec2-34-239-110-81.compute-1.amazonaws.com
+  name: "Deploy Pozos API "
+  become: true
+  tags: deploy-pozos
+  tasks: 
+  - name: "Upgrade server" 
+    apt :
+      name: "*"
+      state: latest
+
+  - name: "Install dependencies and apache server" 
+    apt :
+      name: python-dev,python3-dev,libsasl2-dev,libldap2-dev,libssl-dev,python-pip,apache2
+      state: latest
+
+  - name: "Install python library dependencies"
+    pip:
+      name: 
+        - flask
+        - flask_httpauth
+        - flask_simpleldap
+        - python-dotenv
+
+  - name: "Push student_age.py script"
+    copy:
+      src: "files/student_age.py"
+      dest: "/student_age.py"
+      mode: "0755" 
+
+  - name: "Push student_age.service systemd service"
+    copy:
+      src: "files/student_age.service"
+      dest: "/lib/systemd/system/student_age.service"
+      mode: "0644" 
+      owner: "root"
+
+  - name: "Push student_age.service systemd service Again"
+    copy:
+      src: "files/student_age.service"
+      dest: "/etc/systemd/system/student_age.service"
+      mode: "0644" 
+      owner: "root"
+
+  - name: "Create folder /data"
+    file:
+      path: "/data"
+      state: "directory"
+      mode: "755"
+      owner: "www-data"
+      group: "www-data"
+
+  - name: "Push student_age.json file"
+    copy:
+      src: "files/student_age.json"
+      dest: "/data/student_age.json"
+
+
+  - name: "launch student_age.py script using systemd student_age.service"
+    service: 
+      name: "student_age.service"
+      state: "started"
+      enabled: "yes"
+
+
+  - name: "Push html source code"
+    template:
+      src: "templates/index.php"
+      dest: "/var/www/html/index.php"
+#  handlers:
+#  - name: "Restart apache server if needed"
+#    service: "httpd"
+#    state: "restarted"
+
+  - name: "Recursively change ownership of a webroot directory"
+    file:
+      path: /var/www
+      state: directory
+      recurse: yes
+      owner: www-data
+      group: www-data
+
+  - name: "Start apache server"
+    service:
+      name: "apache2"
+      state: "started"
+      enabled: "yes"

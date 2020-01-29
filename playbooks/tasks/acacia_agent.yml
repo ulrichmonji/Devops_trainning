@@ -1,0 +1,19 @@
+---
+- name: "SD 2847635: update acacia-agent"
+  yum:
+    name: "acacia-agent-v2"
+    enablerepo: acacia-main
+    state: latest
+  notify: "Restart acacia-agent-v2"
+
+- name: "SD 2780888 and 2796607, and then 2847635 : Customise crontab root to free DML file"
+  copy:
+    src: files/crontab_acacia-agent-v2
+    dest: "/etc/cron.d/acacia-agent-v2"
+    owner: "root"
+    group: "root"
+    backup: "yes"
+    mode: 0644
+  notify: "Restart acacia-agent-v2"
+
+

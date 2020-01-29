@@ -1,0 +1,145 @@
+---
+- name: "[FRONT][tcollector] Install necessary packages for tcollector"
+  yum:
+    name: servicetools.noarch
+    enablerepo: awl-main
+    state: latest
+
+- name: "[FRONT][tcollector] Install necessary packages for tcollector [Only CentOS 7]"
+  yum:
+    name: servicetools-tcollector.noarch,awl-tcollector-system.noarch,awl-tcollector-network.noarch,awl-tcollector.noarch
+    enablerepo: awl-main
+    state: latest
+  when:
+    - ansible_distribution == "CentOS"
+    - ansible_distribution_major_version == "7"
+
+- name: "Add OC on /usr/lib/servicetools/tcollector "
+  template:
+    src: templates/usr_lib_servicetools_tcollector
+    dest: /usr/lib/servicetools/tcollector
+    mode: 0755
+    owner: root
+    group: root
+  when:
+    - ansible_distribution == "CentOS"
+    - ansible_distribution_major_version == "6"
+
+- name: "[FRONT][tocllector] Create directory structure Part I"
+  file:
+    path: "{{ tcollector_path }}/{{ item }}"
+    state: directory
+    owner: www
+    group: server
+  with_items:
+    - etc
+    - lib
+    - run
+
+- name: "[FRONT][tocllector] Create directory structure Part II"
+  file:
+    path: "{{ tcollector_path }}/etc/plugins"
+    state: directory
+    owner: www
+    group: server
+
+- name: "[FRONT][tocllector] Create servicetools directory (client name folder)  if doest exist"
+  file:
+    path: "/etc/servicetools/services/{{ client_name }}"
+    state: directory
+    owner: root
+    group: root
+
+
+- name: "Install tcollector servicetools"
+  copy:
+    dest: /etc/servicetools/services/{{ client_name }}/tcollector
+    content: tcollector|20|-B {{ tcollector_path }} -v|tcollector|www
+
+- name: "Create tcollector dispatcher"
+  template:
+    src: templates/dispather_tcollector
+    dest: /etc/servicetools/dispatchers/{{ client_name }}/tcollector
+    mode: 0744
+    owner: root
+    group: root
+  when:
+    - ansible_distribution == "CentOS"
+    - ansible_distribution_major_version == "6"
+
+- name: "[FRONT][tocllector] Create logs directory"
+  file:
+    path: /usr/WEBLOGS/{{ client_folder_name }}/tcollector
+    state: directory
+    owner: www
+    group: server
+
+- name: "[FRONT][tocllector] Symlink logs folder"
+  file:
+    src: /usr/WEBLOGS/{{ client_folder_name }}/tcollector
+    dest: "{{ tcollector_path }}/logs"
+    state: link
+
+- name: "[FRONT][tocllector] Create plugins folder"
+  file:
+    dest: "{{ tcollector_path }}/lib/plugins/{{ item }}"
+    state: directory
+    owner: www
+    group: server
+  with_items:
+    - '0'
+    - 'lib'
+
+- name: "[FRONT][tcollector] Copy plugins file"
+  template:
+    src: templates/{{ item }}
+    dest: "{{ tcollector_path }}/lib/plugins/0/{{ item }}"
+    mode: 0755
+    owner: www
+    group: server
+  with_items:
+    - system.py
+    - network.py
+
+
+- name: "[FRONT][tcollector] Copy standard tcollector plugins"
+  template:
+    src: templates/{{ item }}
+    dest: "{{ tcollector_path }}/lib/plugins/lib/{{ item }}"
+    mode: 0744
+  with_items:
+    - awlutils.py
+    - utils.py
+
+- name: "[FRONT][tcollector] Copy standard tcollector conf file"
+  template:
+    src: templates/{{ item }}
+    dest: "{{ tcollector_path }}/etc/{{ item }}"
+    mode: 0755
+    owner: www
+    group: server
+  with_items:
+    - tcollector.conf.standard
+
+- name: "[FRONT][tcollector] Copy  tcollector plugins conf file"
+  copy:
+    src: "/etc/tcollector/plugins/{{ item }}"
+    dest: "{{ tcollector_path }}/etc/plugins/"
+    owner: www
+    group: server
+    mode: 0755
+    remote_src: yes
+  with_items:
+    - network.conf
+    - system.conf
+
+
+- name: "[FRONT][tcollector] Disable and stop  native tcollector process"
+  service:
+    name: tcollector
+    enabled: no
+    state: stopped
+
+#- name: "[FRONT][tcollector] restart tcollector servicetools"
+#  command: "restart_service tcollector"
+

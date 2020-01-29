@@ -11,7 +11,7 @@
 
   - name: "Install dependencies and apache server" 
     apt :
-      name: python-dev,python3-dev,libsasl2-dev,libldap2-dev,libssl-dev,python-pip,apache2
+      name: python-dev,python3-dev,libsasl2-dev,libldap2-dev,libssl-dev,python-pip,apache2,php
       state: latest
 
   - name: "Install python library dependencies"

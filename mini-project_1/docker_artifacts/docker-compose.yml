@@ -1,0 +1,45 @@
+version: "3.7"
+services:
+  # DATABASE
+  dbCHOCO:
+    hostname: "dbCHOCO"
+    image: "mysql:5.7"
+    container_name: "mysql-CHOCO"
+    volumes:
+      - ./volumes/mysql_lib:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "rootpwdCHOCO"
+      MYSQL_DATABASE: "battleboat"
+      MYSQL_USER: "battleuser"
+      MYSQL_PASSWORD: "battlepass"
+    ports:
+      - 3306:3306
+    networks:
+      - battleboat
+    restart: "always"
+
+  # BATTLEBOAT_SERVICE
+  battleCHOCO:
+    hostname: "battleCHOCO"
+    image: "choco1992/fake-backend"
+    container_name: "fake-backend"
+    volumes:
+      - ./volumes/battleboat-gh-pages:/etc/backend/static 
+    environment:
+      DATABASE_HOST: "dbCHOCO"
+      DATABASE_NAME: "battleboat"
+      DATABASE_USER: "battleuser"
+      DATABASE_PASSWORD: "battlepass"
+      DATABASE_PORT: "3306"
+    ports:
+      - 8181:3000
+    restart: "always"
+    networks:
+      - battleboat
+    depends_on:
+      - dbCHOCO
+
+networks:
+  battleboat:
+    name: "battleboat"
+

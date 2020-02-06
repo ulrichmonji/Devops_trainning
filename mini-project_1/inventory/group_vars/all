@@ -1,0 +1,23 @@
+ansible_user: "centos"
+MYSQL_ROOT_PASSWORD: "rootpwdCHOCO"
+MYSQL_DATABASE: "battleboat"
+MYSQL_USER: "battleuser"
+MYSQL_PASSWORD: "battlepass"
+
+DATABASE_HOST: "dbCHOCO"
+DATABASE_NAME: "battleboat"
+DATABASE_USER: "battleuser"
+DATABASE_PASSWORD: "battlepass"
+DATABASE_PORT: "3306"
+
+docker_hub_login: "choco1992"
+docker_hub_email: "ulrich_nathan@yahoo.fr"
+docker_hub_password: "BecomeD@v0ps1"
+
+home: "/home/centos"
+project_name: "battleboat"
+
+fake_backend_git_url: "https://github.com/alexandrevilain/fake-backend.git"
+fake_backend_image_tag: "1.0"
+battleboat_network: "battleboat"
+

@@ -1,0 +1,102 @@
+---
+- hosts: ec2-18-212-4-25.compute-1.amazonaws.com
+  name: "Deploy Pozos API "
+  become: true
+  tags: deploy-battleboat
+  tasks: 
+  - name: "log into Dockerhub" 
+    docker_login:
+      username: "{{ docker_hub_login }}"
+      email: "{{ docker_hub_email }}"
+      password: "{{ docker_hub_password }}"
+
+  - name: "Create project Workdir "
+    file:
+      path: "{{ home }}/{{ project_name }}"
+      state: "directory"
+
+  - name: "Copy devops private keys file"
+    copy:
+      src: "files/devops_private_keys"
+      dest: "{{ home }}/.ssh/id_rsa"
+      mode: "0644" 
+      owner: "centos"
+
+  - name: "Download fake-backend source code"
+    git:
+      repo: "{{ fake_backend_git_url }}" 
+      dest: "{{ home }}/fake-backend"
+      force: "yes"
+      recursive: "no"
+      key_file: "{{ home }}/.ssh/id_rsa"
+      accept_hostkey: "yes"
+
+  - name: "Build fake-backend image and push on DockerHub"
+    docker_image:
+      path: "{{ home }}/fake-backend"
+      name: "{{ docker_hub_login }}/fake-backend" 
+      push: "yes"
+      tag: "{{ fake_backend_image_tag }}"
+
+  - name: "Create docker network"
+    docker_network:
+      name: "{{ battleboat_network }}"
+
+
+  - name: "Create volumes folders "
+    file:
+      path: "/etc/VOLUMES/{{ item }}"
+      state: "directory"
+    with_items:
+      - "mysql_lib"
+      - "battleboat-gh-pages"
+
+  - name: "Push html webapp file for testing"
+    copy:
+      src: "files/index.html"
+      dest: "/etc/VOLUMES/battleboat-gh-pages"
+      mode: "0644" 
+      owner: "centos"
+
+  - name: "Deploy Database container" 
+    docker_container:
+      name: "mysql-CHOCO"
+      hostname: "dbCHOCO"
+      image: "mysql:5.7"
+      state: "started"
+      volumes: 
+        -  "/etc/VOLUMES/mysql_lib:/var/lib/mysql"
+      networks:
+        - name: "{{ battleboat_network }}"
+      ports:
+        - "3306:3306"
+      restart_policy: "always"
+      env:
+        MYSQL_ROOT_PASSWORD: "{{ MYSQL_ROOT_PASSWORD }}"
+        MYSQL_DATABASE: "{{ MYSQL_DATABASE }}"
+        MYSQL_USER: "{{ MYSQL_USER }}"
+        MYSQL_PASSWORD: "{{ MYSQL_PASSWORD }}"
+
+
+
+  - name: "Deploy fake-backend container" 
+    docker_container:
+      name: "fake-backend"
+      hostname: "battleCHOCO"
+      image: "{{ docker_hub_login }}/fake-backend:{{ fake_backend_image_tag }}"
+      state: "started"
+      volumes: 
+        -  "/etc/VOLUMES/battleboat-gh-pages:/etc/backend/static"
+      networks:
+        - name: "{{ battleboat_network }}"
+      ports:
+        - "8181:3000"
+      restart_policy: "always"
+      env:
+        DATABASE_HOST: "{{ DATABASE_HOST }}"
+        DATABASE_NAME: "{{ DATABASE_NAME }}"
+        DATABASE_USER: "{{ DATABASE_USER }}"
+        DATABASE_PASSWORD: "{{ DATABASE_PASSWORD }}"
+        DATABASE_PORT: "{{ DATABASE_PORT }}"
+
+

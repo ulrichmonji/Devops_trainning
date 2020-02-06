@@ -1,0 +1,17 @@
+---
+- hosts: ec2-34-239-110-81.compute-1.amazonaws.com
+  name: "Deploy Pozos API "
+  become: true
+  tags: testing
+  tasks: 
+  - name: Check that you can connect (GET) to a page and it returns a status 200
+    uri:
+      url: http://{{frontend_hostname}}
+
+
+  - name: Check webservice
+    uri:
+      url: http://{{ansible_target_ip}}:{{api_port}}/pozos/api/v1.0/get_student_ages
+      user: toto
+      password: python
+      method: GET

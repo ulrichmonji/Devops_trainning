@@ -1,2 +1,2 @@
 # Devops_trainning
-All sources for become devops Formation, done by Dirane Tafen
+All sources for ansible project of  devops Formation, done by Dirane Tafen

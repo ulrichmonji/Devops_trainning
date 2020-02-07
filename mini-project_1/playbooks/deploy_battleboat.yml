@@ -60,8 +60,8 @@
 
   - name: "Deploy Database container" 
     docker_container:
-      name: "mysql-CHOCO"
-      hostname: "dbCHOCO"
+      name: "{{ database_mysql_container_name }}"
+      hostname: "{{ database_mysql_container_hostname }}"
       image: "mysql:5.7"
       state: "started"
       volumes: 
@@ -81,8 +81,8 @@
 
   - name: "Deploy fake-backend container" 
     docker_container:
-      name: "fake-backend"
-      hostname: "battleCHOCO"
+      name: "{{ fake_backend_container_name }}"
+      hostname: "{{ fake_backend_container_hostname }}"
       image: "{{ docker_hub_login }}/fake-backend:{{ fake_backend_image_tag }}"
       state: "started"
       volumes: 

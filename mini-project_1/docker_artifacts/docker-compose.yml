@@ -4,7 +4,7 @@ services:
   dbCHOCO:
     hostname: "dbCHOCO"
     image: "mysql:5.7"
-    container_name: "mysql-CHOCO"
+    container_name: "dbCHOCO"
     volumes:
       - ./volumes/mysql_lib:/var/lib/mysql
     environment:
@@ -20,9 +20,9 @@ services:
 
   # BATTLEBOAT_SERVICE
   battleCHOCO:
-    hostname: "battleCHOCO"
+    hostname: "battleboatCHOCO"
     image: "choco1992/fake-backend"
-    container_name: "fake-backend"
+    container_name: "battleboatCHOCO"
     volumes:
       - ./volumes/battleboat-gh-pages:/etc/backend/static 
     environment:

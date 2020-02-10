@@ -24,7 +24,7 @@ services:
     image: "choco1992/fake-backend"
     container_name: "battleboatCHOCO"
     volumes:
-      - ./volumes/battleboat-gh-pages:/etc/backend/static 
+      - ./files/battleboat:/etc/backend/static 
     environment:
       DATABASE_HOST: "dbCHOCO"
       DATABASE_NAME: "battleboat"

@@ -53,7 +53,7 @@
 
   - name: "Push html webapp file for testing"
     copy:
-      src: "files/index.html"
+      src: "files/battleboat"
       dest: "/etc/VOLUMES/battleboat-gh-pages"
       mode: "0644" 
       owner: "centos"

@@ -1,5 +1,5 @@
 FROM ubuntu
-MAINTAINER Gregoire Daure
+MAINTAINER U MONJI
 RUN apt-get update
 RUN apt-get install -y nginx
 COPY ./files/ /var/www/html

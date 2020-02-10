@@ -12,7 +12,7 @@ DATABASE_PORT: "3306"
 
 docker_hub_login: "choco1992"
 docker_hub_email: "ulrich_nathan@yahoo.fr"
-docker_hub_password: "BecomeD@v0ps1"
+docker_hub_password: "Choco2015"
 
 home: "/home/centos"
 project_name: "battleboat"

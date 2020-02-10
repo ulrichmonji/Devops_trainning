@@ -11,7 +11,7 @@ rm -f /lib/systemd/system/basic.target.wants/*;\
 rm -f /lib/systemd/system/anaconda.target.wants/*;
 VOLUME [ "/sys/fs/cgroup" ]
 RUN yum -y install httpd net-tools; yum clean all; systemctl enable httpd.service
-COPY files/index.html /var/www/html
+COPY files/* /var/www/html/
 EXPOSE 80
 CMD ["/usr/sbin/httpd", "-DFOREGROUND"]
 

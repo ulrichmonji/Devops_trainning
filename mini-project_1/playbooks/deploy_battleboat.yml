@@ -1,5 +1,5 @@
 ---
-- hosts: ec2-18-212-4-25.compute-1.amazonaws.com
+- hosts: all
   name: "Deploy Pozos API "
   become: true
   tags: deploy-battleboat
@@ -53,7 +53,7 @@
 
   - name: "Push html webapp file for testing"
     copy:
-      src: "files/battleboat"
+      src: "files/battleboat/"
       dest: "/etc/VOLUMES/battleboat-gh-pages"
       mode: "0644" 
       owner: "centos"
